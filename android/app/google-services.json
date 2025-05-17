@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "583528723541",
+    "firebase_url": "https://wifi-hygrometer-default-rtdb.firebaseio.com",
+    "project_id": "wifi-hygrometer",
+    "storage_bucket": "wifi-hygrometer.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:583528723541:android:9f958e8ab1dd8a2a6cd0dc",
+        "android_client_info": {
+          "package_name": "com.example.iot_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcp6hug3bq_p2LQZkDJvm6PL9B-lk7oio"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:583528723541:android:3cd6ac25a5081f936cd0dc",
+        "android_client_info": {
+          "package_name": "com.example.my_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcp6hug3bq_p2LQZkDJvm6PL9B-lk7oio"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
