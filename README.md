@@ -90,7 +90,7 @@ firmware/
 
 1. Clone this repo
 2. Add your Firebase `google-services.json` and setup Firebase project
-3. Flash `firmware/esp8266_thermosensor.ino` to ESP8266
+3. Flash `firmware/firmware.ino` to ESP8266
 4. Run the Flutter app
 5. Provision device Wi-Fi using app
 
@@ -100,4 +100,4 @@ firmware/
 
 Have questions or want to collaborate?  
 Reach out to me on jigneshk1997@gmail.com
-Hire me on Fiverr: [https://fiverr.com/iot_guy](https://www.fiverr.com/iot_guy)
+Hire me on Fiverr: [https://www.fiverr.com/iot_guy/develop-an-app-for-your-iot-business](https://www.fiverr.com/iot_guy/develop-an-app-for-your-iot-business)
