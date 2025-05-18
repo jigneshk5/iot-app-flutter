@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart';
-import 'profile.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart' as gauges;
+import 'package:syncfusion_flutter_charts/charts.dart';
+import 'dart:async';
 
 class HomePage extends StatefulWidget {
   final String deviceId;
@@ -14,18 +15,35 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
+class ChartData {
+  final DateTime time;
+  final double value;
+  ChartData(this.time, this.value);
+}
 
 class _HomePageState extends State<HomePage> {
   late MqttServerClient client;
   double temperature = 0;
   double humidity = 0;
+  List<ChartData> tempData = [];
+  List<ChartData> humData = [];
+  late Timer _timer;
+    StreamSubscription? mqttSubscription;
+bool _isMounted = true;
 
   @override
   void initState() {
     super.initState();
-    print('Connected to device ID: ${widget.deviceId}');
     _connectToMqtt();
   }
+
+  @override
+void dispose() {
+  _isMounted = false;
+  mqttSubscription?.cancel();
+  client.disconnect();
+  super.dispose();
+}
 
   void _connectToMqtt() async {
     client = MqttServerClient('broker.hivemq.com', 'flutter_hygrometer_${DateTime.now().millisecondsSinceEpoch}');
@@ -44,23 +62,35 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
-    client.updates?.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
-      if (c != null && c.isNotEmpty) {
+    mqttSubscription = client.updates?.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
+        if (!mounted || c == null || c.isEmpty) return;
+
         final MqttPublishMessage recMess = c[0].payload as MqttPublishMessage;
         final String payload = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
         final parts = payload.split(',');
+
         if (parts.length == 2) {
-          setState(() {
-            temperature = double.tryParse(parts[0]) ?? 0;
-            humidity = double.tryParse(parts[1]) ?? 0;
-          });
+            final now = DateTime.now();
+            final temp = double.tryParse(parts[0]) ?? 0;
+            final hum = double.tryParse(parts[1]) ?? 0;
+
+            if (!mounted) return;
+            setState(() {
+            temperature = temp;
+            tempData.add(ChartData(now, temp));
+            });
+
+            if (!mounted) return;
+            setState(() {
+            humidity = hum;
+            humData.add(ChartData(now, hum));
+            });
         }
-      }
-    });
+        });
+
   }
 
   void _onConnected() {
-    print('Connected');
     client.subscribe('${widget.deviceId}/data', MqttQos.atMostOnce);
   }
 
@@ -76,65 +106,108 @@ class _HomePageState extends State<HomePage> {
     print('Failed to subscribe $topic');
   }
 
-  Widget _buildHomePage() {
-  return SingleChildScrollView(
+Widget _buildGauge(String label, double value, String unit) {
+  return Expanded(
     child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        SizedBox(height: 20),
-        Text('Temperature', style: TextStyle(fontSize: 20)),
-        SfRadialGauge(
-          axes: <RadialAxis>[
-            RadialAxis(
-              minimum: 0,
-              maximum: 100,
-              pointers: <GaugePointer>[NeedlePointer(value: temperature)],
-              annotations: <GaugeAnnotation>[
-                GaugeAnnotation(
-                  widget: Text('$temperature °C', style: TextStyle(fontSize: 16)),
-                  angle: 90,
-                  positionFactor: 0.5,
-                )
-              ],
-            )
-          ],
-        ),
-        SizedBox(height: 20),
-        Text('Humidity', style: TextStyle(fontSize: 20)),
-        SfRadialGauge(
-          axes: <RadialAxis>[
-            RadialAxis(
-              minimum: 0,
-              maximum: 100,
-              pointers: <GaugePointer>[NeedlePointer(value: humidity)],
-              annotations: <GaugeAnnotation>[
-                GaugeAnnotation(
-                  widget: Text('$humidity %', style: TextStyle(fontSize: 16)),
-                  angle: 90,
-                  positionFactor: 0.5,
-                )
-              ],
-            )
-          ],
-        ),
-        SizedBox(height: 80), // add space so content doesn't get hidden behind bottom nav
+        Text(label, style: TextStyle(fontSize: 16)),
+        SizedBox(
+          height: 120,
+          child: gauges.SfRadialGauge(
+            axes: <gauges.RadialAxis>[
+              gauges.RadialAxis(
+                minimum: 0,
+                maximum: 100,
+                showTicks: false,
+                showLabels: false,
+                axisLineStyle: gauges.AxisLineStyle(
+                  thickness: 0.15,
+                  cornerStyle: gauges.CornerStyle.bothFlat,
+                  thicknessUnit: gauges.GaugeSizeUnit.factor,
+                ),
+                pointers: <gauges.GaugePointer>[
+                  gauges.RangePointer(
+                    value: value,
+                    width: 0.15,
+                    color: Colors.blue,
+                    cornerStyle: gauges.CornerStyle.bothCurve,
+                    sizeUnit: gauges.GaugeSizeUnit.factor,
+                  ),
+                ],
+                annotations: <gauges.GaugeAnnotation>[
+                  gauges.GaugeAnnotation(
+                    widget: Text('$value $unit', style: TextStyle(fontSize: 12)),
+                    angle: 90,
+                    positionFactor: 0.0,
+                  ),
+                ],
+              )
+            ],
+          ),
+        )
       ],
     ),
   );
 }
 
 
-  Widget _buildProfilePage() {
-    return ProfilePage(); // must be implemented in profile.dart
+
+  Widget _buildChart(String title, List<ChartData> data, String unit) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        ),
+        SizedBox(
+          height: 200,
+          child: SfCartesianChart(
+            primaryXAxis: DateTimeAxis(),
+            series: <CartesianSeries<dynamic, dynamic>>[
+                LineSeries<ChartData, DateTime>(
+                dataSource: data,
+                xValueMapper: (ChartData d, _) => d.time,
+                yValueMapper: (ChartData d, _) => d.value,
+                name: unit,
+                dataLabelSettings: DataLabelSettings(isVisible: false),
+                )
+            ],
+            )
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHomePage() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                _buildGauge('Temp', temperature, '°C'),
+                SizedBox(width: 8),
+                _buildGauge('Humidity', humidity, '%'),
+              ],
+            ),
+            SizedBox(height: 16),
+            _buildChart('Temperature Trend', tempData, '°C'),
+            SizedBox(height: 16),
+            _buildChart('Humidity Trend', humData, '%'),
+            SizedBox(height: 40),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(widget.deviceName)),
-      body: Center(
-        child: _buildHomePage(),
-      )
+      body: _buildHomePage(),
     );
   }
 }

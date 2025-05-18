@@ -134,76 +134,76 @@ void _confirmDelete(String deviceId) {
   }
 
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(title: Text("Devices")),
-    body: RefreshIndicator(
-      onRefresh: _refreshDevices,
-      child: _selectedIndex == 0
-          ? (devices.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.devices, size: 80, color: Colors.grey),
-                      SizedBox(height: 16),
-                      Text("No devices found", style: TextStyle(fontSize: 18, color: Colors.grey)),
-                    ],
-                  ),
-                )
-              : ListView.builder(
-                  itemCount: devices.length,
-                  itemBuilder: (_, index) {
-                    final device = devices[index];
-                    return Card(
-                      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: ListTile(
-                        leading: Icon(Icons.thermostat, color: Colors.blue),
-                        title: Text(device['name'] ?? 'Unnamed'),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.edit, color: Colors.orange),
-                              onPressed: () => _editDevice(device),
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: _selectedIndex == 0?AppBar(title: Text("Devices")): AppBar(title: Text("Profile")),
+        body: RefreshIndicator(
+        onRefresh: _refreshDevices,
+        child: _selectedIndex == 0
+            ? (devices.isEmpty
+                ? Center(
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                        Icon(Icons.devices, size: 80, color: Colors.grey),
+                        SizedBox(height: 16),
+                        Text("No devices found", style: TextStyle(fontSize: 18, color: Colors.grey)),
+                        ],
+                    ),
+                    )
+                : ListView.builder(
+                    itemCount: devices.length,
+                    itemBuilder: (_, index) {
+                        final device = devices[index];
+                        return Card(
+                        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: ListTile(
+                            leading: Icon(Icons.thermostat, color: Colors.blue),
+                            title: Text(device['name'] ?? 'Unnamed'),
+                            trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                                IconButton(
+                                icon: Icon(Icons.edit, color: Colors.orange),
+                                onPressed: () => _editDevice(device),
+                                ),
+                                IconButton(
+                                icon: Icon(Icons.delete, color: Colors.red),
+                                onPressed: () => _confirmDelete(device['id']),
+                                ),
+                            ],
                             ),
-                            IconButton(
-                              icon: Icon(Icons.delete, color: Colors.red),
-                              onPressed: () => _confirmDelete(device['id']),
-                            ),
-                          ],
+                            onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                builder: (_) => HomePage(
+                                    deviceId: device['id'],
+                                    deviceName: device['name'],
+                                ),
+                                ),
+                            );
+                            },
                         ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => HomePage(
-                                deviceId: device['id'],
-                                deviceName: device['name'],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ))
-          : _buildProfilePage(),
-    ),
-    floatingActionButton: FloatingActionButton(
-      child: Icon(Icons.add),
-      onPressed: startProvisioningFlow,
-    ),
-    bottomNavigationBar: BottomNavigationBar(
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-      ],
-      currentIndex: _selectedIndex,
-      onTap: _onItemTapped,
-    ),
-  );
-}
+                        );
+                    },
+                    ))
+            : _buildProfilePage(),
+        ),
+        floatingActionButton: _selectedIndex == 0 ?FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: startProvisioningFlow,
+        ): null,
+        bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        ],
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        ),
+    );
+    }
 }
 
 class WifiProvisionStep1 extends StatefulWidget {

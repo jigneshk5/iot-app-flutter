@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'auth_page.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -51,17 +52,27 @@ class _ProfilePageState extends State<ProfilePage> {
     if (confirm == true) {
       try {
         await user?.delete();
-        Navigator.of(context).pop();
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => AuthPage()),
+          (route) => false,
+        );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
       }
     }
   }
 
+  Future<void> logOut() async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => AuthPage()),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Profile')),
       body: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -76,6 +87,12 @@ class _ProfilePageState extends State<ProfilePage> {
               onPressed: deleteAccount,
               style: TextButton.styleFrom(foregroundColor: Colors.red),
               child: Text('Delete Account'),
+            ),
+            SizedBox(height: 80),
+            ElevatedButton(
+              onPressed: logOut,
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red[800], foregroundColor: Colors.white),
+              child: Text('Log Out'),
             )
           ],
         ),
