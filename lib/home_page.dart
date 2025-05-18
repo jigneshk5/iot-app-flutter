@@ -6,8 +6,9 @@ import 'profile.dart';
 
 class HomePage extends StatefulWidget {
   final String deviceId;
+  final String deviceName;
 
-  HomePage({required this.deviceId});
+  const HomePage({required this.deviceId, required this.deviceName});
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -18,7 +19,6 @@ class _HomePageState extends State<HomePage> {
   late MqttServerClient client;
   double temperature = 0;
   double humidity = 0;
-  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -61,7 +61,7 @@ class _HomePageState extends State<HomePage> {
 
   void _onConnected() {
     print('Connected');
-    client.subscribe('sensor/hygrometer/data', MqttQos.atMostOnce);
+    client.subscribe('${widget.deviceId}/data', MqttQos.atMostOnce);
   }
 
   void _onDisconnected() {
@@ -74,12 +74,6 @@ class _HomePageState extends State<HomePage> {
 
   void _onSubscribeFail(String topic) {
     print('Failed to subscribe $topic');
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
   }
 
   Widget _buildHomePage() {
@@ -137,9 +131,9 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('WiFi Hygrometer')),
+      appBar: AppBar(title: Text(widget.deviceName)),
       body: Center(
-        child: _selectedIndex == 0 ? _buildHomePage() : _buildProfilePage(),
+        child: _buildHomePage(),
       )
     );
   }

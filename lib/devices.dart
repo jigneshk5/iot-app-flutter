@@ -10,6 +10,7 @@ import 'home_page.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:open_settings_plus/open_settings_plus.dart';
 import 'package:wifi_scan/wifi_scan.dart';
+import 'profile.dart';
 
 class DevicesPage extends StatefulWidget {
   @override
@@ -20,35 +21,57 @@ class _DevicesPageState extends State<DevicesPage> {
   final user = FirebaseAuth.instance.currentUser;
   late DatabaseReference dbRef;
   List<Map<String, dynamic>> devices = [];
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   void initState() {
     super.initState();
     dbRef = FirebaseDatabase.instance.ref("devices/${user?.uid}");
-    _initFetch(); // call async method
+    fetchDevices2();
   }
-  Future<void> _initFetch() async {
-    await fetchDevices(); // your async logic
+  void fetchDevices2() {
+  dbRef.onValue.listen((event) {
+    final data = event.snapshot.value as Map<dynamic, dynamic>?;
+    if (data != null) {
+      final loadedDevices = data.entries.map((e) {
+        return {
+          'id': e.key,
+          'name': e.value['name'] ?? '',
+        };
+      }).toList();
+      setState(() => devices = loadedDevices);
+    } else {
+      setState(() => devices = []);
     }
+  });
+}
 
   Future<void> _refreshDevices() async {
     await fetchDevices();
    }
 
   Future<void> fetchDevices() async {
-    dbRef.onValue.listen((event) {
-      final data = event.snapshot.value as Map<dynamic, dynamic>?;
-      if (data != null) {
-        final loadedDevices = data.entries.map((e) {
-          return {
-            'id': e.key,
-            'name': e.value['name'] ?? '',
-          };
-        }).toList();
-        setState(() => devices = loadedDevices);
-      }
-    });
+  final snapshot = await dbRef.get();
+  final data = snapshot.value as Map<dynamic, dynamic>?;
+
+  if (data != null) {
+    final loadedDevices = data.entries.map((e) {
+      return {
+        'id': e.key,
+        'name': e.value['name'] ?? '',
+      };
+    }).toList();
+    setState(() => devices = loadedDevices);
+  } else {
+    setState(() => devices = []);
   }
+}
 
   void startProvisioningFlow() async {
     final selected = await Navigator.push(
@@ -106,61 +129,81 @@ void _confirmDelete(String deviceId) {
     ),
   );
 }
-
+  Widget _buildProfilePage() {
+    return ProfilePage(); // must be implemented in profile.dart
+  }
 
   @override
-    Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(title: Text("Devices")),
-        body: RefreshIndicator(
-        onRefresh: _refreshDevices,
-        child: ListView.builder(
-            itemCount: devices.length,
-            itemBuilder: (_, index) {
-            final device = devices[index];
-            return Card(
-                margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: ListTile(
-                leading: Icon(Icons.thermostat, color: Colors.blue),
-                title: Text(device['name'] ?? 'Unnamed'),
-                trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(title: Text("Devices")),
+    body: RefreshIndicator(
+      onRefresh: _refreshDevices,
+      child: _selectedIndex == 0
+          ? (devices.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                    IconButton(
-                        icon: Icon(Icons.edit, color: Colors.orange),
-                        onPressed: () => _editDevice(device),
-                    ),
-                    IconButton(
-                        icon: Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => _confirmDelete(device['id']),
-                    ),
+                      Icon(Icons.devices, size: 80, color: Colors.grey),
+                      SizedBox(height: 16),
+                      Text("No devices found", style: TextStyle(fontSize: 18, color: Colors.grey)),
                     ],
-                ),
-                onTap: () {
-                    Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => HomePage(deviceId: device['id'])),
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: devices.length,
+                  itemBuilder: (_, index) {
+                    final device = devices[index];
+                    return Card(
+                      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: ListTile(
+                        leading: Icon(Icons.thermostat, color: Colors.blue),
+                        title: Text(device['name'] ?? 'Unnamed'),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.edit, color: Colors.orange),
+                              onPressed: () => _editDevice(device),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => _confirmDelete(device['id']),
+                            ),
+                          ],
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => HomePage(
+                                deviceId: device['id'],
+                                deviceName: device['name'],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     );
-                },
-                ),
-            );
-            },
-        ),
-        ),
-        floatingActionButton: FloatingActionButton(
-            child: Icon(Icons.add),
-            onPressed: startProvisioningFlow,
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-            items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-            ],
-            currentIndex: _selectedIndex,
-            onTap: _onItemTapped,
-        ),
-    );
-    }
+                  },
+                ))
+          : _buildProfilePage(),
+    ),
+    floatingActionButton: FloatingActionButton(
+      child: Icon(Icons.add),
+      onPressed: startProvisioningFlow,
+    ),
+    bottomNavigationBar: BottomNavigationBar(
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+      ],
+      currentIndex: _selectedIndex,
+      onTap: _onItemTapped,
+    ),
+  );
+}
 }
 
 class WifiProvisionStep1 extends StatefulWidget {
@@ -259,18 +302,19 @@ void _startWifiPolling() async {
     );
 
     if (response.statusCode == 200) {
-      saveCredentials();
-    //   final dbRef = FirebaseDatabase.instance.ref("devices/${widget.userId}");
-    //   final newDeviceRef = dbRef.push();
-    //   await newDeviceRef.set({
-    //     'name': 'Unnamed',
-    //     'provisioned': true,
-    //     'ssid': ssidController.text.trim()
-    //   });
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => WifiProvisionStep3(userId: widget.userId)),
-      );
+        saveCredentials();
+        final responseData = jsonDecode(response.body);
+        final deviceId = responseData['deviceId'];
+
+        final dbRef = FirebaseDatabase.instance.ref("devices/${widget.userId}/$deviceId");
+        await dbRef.set({
+            'name': "ThermoSensor"
+        });
+
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => WifiProvisionStep3(userId: widget.userId, deviceId: deviceId)),
+        );
     } else {
       setState(() => loading = false);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Provisioning failed")));
@@ -346,7 +390,8 @@ void _startWifiPolling() async {
 
 class WifiProvisionStep3 extends StatefulWidget {
   final String userId;
-  WifiProvisionStep3({required this.userId});
+  final String deviceId;
+  WifiProvisionStep3({required this.userId, required this.deviceId});
 
   @override
   _WifiProvisionStep3State createState() => _WifiProvisionStep3State();
@@ -356,10 +401,10 @@ class _WifiProvisionStep3State extends State<WifiProvisionStep3> {
   final nameController = TextEditingController();
 
   void saveDevice() async {
-    final dbRef = FirebaseDatabase.instance.ref("devices/${widget.userId}");
-    final newRef = dbRef.push();
-    await newRef.set({
-      'name': nameController.text.trim(),
+    final dbRef = FirebaseDatabase.instance
+        .ref("devices/${widget.userId}/${widget.deviceId}");
+    await dbRef.update({
+        'name': nameController.text.trim(),
     });
     Navigator.pop(context, true);
   }
