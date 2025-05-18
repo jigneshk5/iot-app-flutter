@@ -140,15 +140,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(title: Text('WiFi Hygrometer')),
       body: Center(
         child: _selectedIndex == 0 ? _buildHomePage() : _buildProfilePage(),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.thermostat), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-      ),
+      )
     );
   }
 }
