@@ -47,6 +47,8 @@ dependencies:
   wifi_scan: ^0.4.1+2
   fl_chart: ^1.0.0
   syncfusion_flutter_charts: ^29.2.4
+  path_provider: ^2.1.5
+  share_plus: ^7.2.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
