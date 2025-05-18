@@ -164,7 +164,7 @@ void _confirmDelete(String deviceId) {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                                 IconButton(
-                                icon: Icon(Icons.edit, color: Colors.orange),
+                                icon: Icon(Icons.edit, color: Color(0xFF14f195) ),
                                 onPressed: () => _editDevice(device),
                                 ),
                                 IconButton(
@@ -357,35 +357,79 @@ void _startWifiPolling() async {
 }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Choose Network")),
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            GestureDetector(
-              onTap: showSsidOptions,
-              child: AbsorbPointer(
-                child: TextField(
-                  controller: ssidController,
-                  decoration: InputDecoration(labelText: 'Wi-Fi Name'),
+Widget build(BuildContext context) {
+  final themeColor = Color(0xFF14f195);
+
+  return Scaffold(
+    appBar: AppBar(
+      title: Text("Choose Network"),
+      backgroundColor: themeColor,
+      foregroundColor: Colors.black,
+    ),
+    backgroundColor: Colors.white,
+    body: Center(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(24),
+        child: Container(
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text("Wi-Fi Provisioning",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center),
+              SizedBox(height: 24),
+              GestureDetector(
+                onTap: showSsidOptions,
+                child: AbsorbPointer(
+                  child: TextField(
+                    controller: ssidController,
+                    decoration: InputDecoration(
+                      labelText: 'Wi-Fi Name',
+                      prefixIcon: Icon(Icons.wifi),
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
                 ),
               ),
-            ),
-            TextField(controller: passwordController, decoration: InputDecoration(labelText: 'Password'), obscureText: true),
-            SizedBox(height: 20),
-            loading
-                ? CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: handleNext,
-                    child: Text("Connect"),
-                  )
-          ],
+              SizedBox(height: 16),
+              TextField(
+                controller: passwordController,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  prefixIcon: Icon(Icons.lock),
+                  border: OutlineInputBorder(),
+                ),
+                obscureText: true,
+              ),
+              SizedBox(height: 24),
+              loading
+                  ? Center(child: CircularProgressIndicator())
+                  : ElevatedButton.icon(
+                      onPressed: handleNext,
+                      icon: Icon(Icons.wifi_protected_setup),
+                      label: Text("Connect"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: themeColor,
+                        foregroundColor: Colors.black,
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+            ],
+          ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 class WifiProvisionStep3 extends StatefulWidget {
@@ -410,19 +454,63 @@ class _WifiProvisionStep3State extends State<WifiProvisionStep3> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Name Device")),
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(controller: nameController, decoration: InputDecoration(labelText: "Device Name")),
-            SizedBox(height: 20),
-            ElevatedButton(onPressed: saveDevice, child: Text("Save")),
-          ],
+Widget build(BuildContext context) {
+  final themeColor = Color(0xFF14f195);
+
+  return Scaffold(
+    appBar: AppBar(
+      title: Text("Enter Device Name"),
+      backgroundColor: themeColor,
+      foregroundColor: Colors.black,
+    ),
+    backgroundColor: Colors.white,
+    body: Center(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(24),
+        child: Container(
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                "Name Your Device",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 24),
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  labelText: "Device Name",
+                  prefixIcon: Icon(Icons.devices),
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: saveDevice,
+                icon: Icon(Icons.save),
+                label: Text("Save"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: themeColor,
+                  foregroundColor: Colors.black,
+                  padding: EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 }

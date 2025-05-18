@@ -287,8 +287,13 @@ Future<void> _exportToCSV(List<ChartData> dataList, String fileName) async {
 
   @override
   Widget build(BuildContext context) {
+    final themeColor = Color(0xFF14f195);
     return Scaffold(
-      appBar: AppBar(title: Text(widget.deviceName)),
+      appBar: AppBar(
+        title: Text(widget.deviceName),
+        backgroundColor: themeColor,
+        foregroundColor: Colors.black,
+      ),
       body: _buildHomePage(),
     );
   }

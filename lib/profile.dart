@@ -72,29 +72,73 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final themeColor = Color(0xFF14f195);
     return Scaffold(
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(controller: nameController, decoration: InputDecoration(labelText: 'Name')),
-            TextField(controller: emailController, decoration: InputDecoration(labelText: 'Email')),
-            TextField(controller: passwordController, decoration: InputDecoration(labelText: 'New Password'), obscureText: true),
-            SizedBox(height: 20),
-            ElevatedButton(onPressed: updateProfile, child: Text('Save Changes')),
-            SizedBox(height: 20),
-            TextButton(
-              onPressed: deleteAccount,
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: Text('Delete Account'),
+      backgroundColor: Colors.white,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: 24),
+          child: Container(
+            padding: EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
             ),
-            SizedBox(height: 80),
-            ElevatedButton(
-              onPressed: logOut,
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red[800], foregroundColor: Colors.white),
-              child: Text('Log Out'),
-            )
-          ],
+            child: Column(
+              children: [
+                CircleAvatar(
+                  radius: 40,
+                  backgroundColor: themeColor.withOpacity(0.2),
+                  child: Icon(Icons.person, size: 40, color: themeColor),
+                ),
+                SizedBox(height: 16),
+                Text('My Profile', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                SizedBox(height: 24),
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(labelText: 'Name', border: OutlineInputBorder()),
+                ),
+                SizedBox(height: 12),
+                TextField(
+                  controller: emailController,
+                  decoration: InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
+                ),
+                SizedBox(height: 12),
+                TextField(
+                  controller: passwordController,
+                  decoration: InputDecoration(labelText: 'New Password', border: OutlineInputBorder()),
+                  obscureText: true,
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: updateProfile,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: themeColor,
+                    minimumSize: Size(double.infinity, 48),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: Text('Save Changes', style: TextStyle(color: Colors.black)),
+                ),
+                SizedBox(height: 12),
+                OutlinedButton(
+                  onPressed: deleteAccount,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    side: BorderSide(color: Colors.red),
+                    minimumSize: Size(double.infinity, 48),
+                  ),
+                  child: Text('Delete Account'),
+                ),
+                SizedBox(height: 20),
+                TextButton(
+                  onPressed: logOut,
+                  style: TextButton.styleFrom(foregroundColor: Colors.red[800]),
+                  child: Text('Log Out'),
+                )
+              ],
+            ),
+          ),
         ),
       ),
     );
