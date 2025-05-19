@@ -99,5 +99,5 @@ firmware/
 ## 📩 Connect
 
 Have questions or want to collaborate?  
-Reach out to me on jigneshk1997@gmail.com
+Reach out to me on jigneshk19978@gmail.com
 Hire me on Fiverr: [https://www.fiverr.com/iot_guy/develop-an-app-for-your-iot-business](https://www.fiverr.com/iot_guy/develop-an-app-for-your-iot-business)
