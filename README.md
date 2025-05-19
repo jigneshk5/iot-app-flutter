@@ -63,7 +63,7 @@ A complete **IoT thermostat system** powered by Flutter, Firebase, and MQTT, int
 - **Flutter 3.19+**
 - **Firebase Authentication**
 - **Firebase Realtime Database**
-- **MQTT via mqtt_client**
+- **MQTT via HiveMQ**
 - **ESP8266 + DHT22**
 - **Syncfusion Charts & Gauges**
 
